@@ -8,11 +8,11 @@ class Monster(pygame.sprite.Sprite):
         super().__init__()
         self.screen = screen
         self.base_image = pygame.image.load(os.path.join('assets', image_file)).convert_alpha()
-        self.base_image = pygame.transform.scale(self.base_image, (80, 80))  # Scale down the image
+        self.base_image = pygame.transform.scale(self.base_image, (80, 80))
         self.image = self.base_image
         self.original_image = self.image
         self.rect = self.image.get_rect(center=(x, y))
-        self.mask = pygame.mask.from_surface(self.image)  # Create a mask for the player
+        self.mask = pygame.mask.from_surface(self.image)
         self.health = 100
         self.max_health = 100
         self.speed = 2 #1

@@ -4,10 +4,10 @@ import os
 class ObstacleGroup:
     def __init__(self, screen, image_file):
         self.screen = screen
-        self.obstacle_map = pygame.sprite.Sprite()  # Create a Sprite for the obstacle map
+        self.obstacle_map = pygame.sprite.Sprite()
         self.obstacle_map.image = pygame.image.load(os.path.join('assets', image_file)).convert_alpha()
         self.obstacle_map.rect = self.obstacle_map.image.get_rect()
-        self.obstacle_map.mask = pygame.mask.from_surface(self.obstacle_map.image)  # For pixel-perfect collision
+        self.obstacle_map.mask = pygame.mask.from_surface(self.obstacle_map.image)
 
     def update(self):
         pass

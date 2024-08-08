@@ -16,21 +16,17 @@ class HealthBar:
         self.font_size = font_size
         self.font_color = font_color
         
-        # Initialize font
         self.font = pygame.font.Font(None, self.font_size)
 
     def set_health(self, health):
-        self.current_health = max(0, min(health, self.max_health))  # Clamp health between 0 and max_health
+        self.current_health = max(0, min(health, self.max_health))
 
     def draw(self):
-        # Draw the background of the health bar
         pygame.draw.rect(self.screen, self.background_color, (self.x, self.y, self.width, self.height))
         
-        # Draw the filled portion of the health bar
         fill_width = self.width * (self.current_health / self.max_health)
         pygame.draw.rect(self.screen, self.color, (self.x, self.y, fill_width, self.height))
 
-        # Render the health number
         health_text = f"{round(self.current_health, 1)}"
         text_surface = self.font.render(health_text, True, self.font_color)
         text_rect = text_surface.get_rect(center=(self.x + self.width / 2, self.y + self.height / 2))
@@ -77,7 +73,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += speed
             original_rect = self.check_collision(obstacles, original_rect)
         
-        # Check for weapon pickup
         if keys[pygame.K_f]:
             for weapon in weapons.weapons:
                 if pygame.sprite.collide_rect(self, weapon):
@@ -89,21 +84,18 @@ class Player(pygame.sprite.Sprite):
                     break
         
     def update_direction(self, obstacles, offset_x, offset_y):
-        original_rect = self.rect.copy()  # Store the original position
+        original_rect = self.rect.copy()
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        # Calculate the angle to the mouse
         dx = mouse_x - self.rect.centerx - offset_x
         dy = mouse_y - self.rect.centery - offset_y
-        angle = math.degrees(math.atan2(-dy, dx)) - 90  # atan2 returns angle in radians
+        angle = math.degrees(math.atan2(-dy, dx)) - 90
 
-        # Rotate the image
         self.image = pygame.transform.rotate(self.original_image, angle)
         self.rect = self.image.get_rect(center=self.rect.center)
         original_rect = self.check_collision(obstacles, original_rect)
         self.mask = pygame.mask.from_surface(self.image)
         
-        # Adjust the center downwards
         # self.rect.centery += self.center_offset if self.weapon is not None else 0
     
     def check_collision(self, obstacles, original_rect):

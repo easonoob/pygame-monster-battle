@@ -2,6 +2,8 @@ import pygame
 import os
 import math
 
+pygame.mixer.init()
+
 class HealthBar:
     def __init__(self, screen, x, y, width, height, color, background_color, font_size=36, font_color=(0, 0, 0)):
         self.screen = screen
@@ -46,6 +48,7 @@ class Player(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.weapon = None
         self.center_offset = 20
+        self.load_sound = pygame.mixer.Sound(os.path.join('assets', 'loadgun.mp3'))
 
         self.health = 100
         w, h = pygame.display.get_surface().get_size()
@@ -81,6 +84,7 @@ class Player(pygame.sprite.Sprite):
                     self.image = self.weapon_image
                     self.mask = pygame.mask.from_surface(self.image)
                     self.original_image = self.weapon_image
+                    self.load_sound.play()
                     break
         
     def update_direction(self, obstacles, offset_x, offset_y):

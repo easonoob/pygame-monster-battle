@@ -1,4 +1,6 @@
 import pygame
+import os
+import threading
 from src.player import Player
 from src.weapons import WeaponGroup
 from src.obstacles import ObstacleGroup
@@ -6,11 +8,26 @@ from src.monster import MonsterGroup
 from src.screens import StartScreen, GameOverScreen
 
 pygame.init()
+pygame.mixer.init()
 
 screen_width, screen_height = 1600, 1000
 map_width, map_height = 1921, 1021
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Monster Battle")
+
+game_over_sound = pygame.mixer.Sound(os.path.join('assets', 'gameover.mp3'))
+win_sound = pygame.mixer.Sound(os.path.join('assets', 'win.mp3'))
+bg_music = pygame.mixer.music.load(os.path.join('assets', "background_music.mp3"))
+
+def play_background_music():
+    pygame.mixer.music.play(-1)
+    while True:
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.play(-1)
+
+background_music_thread = threading.Thread(target=play_background_music)
+background_music_thread.daemon = True
+background_music_thread.start()
 
 def init():
     player = Player(screen, 150, 150, 'player_fists1.png')
@@ -38,11 +55,11 @@ def main():
             screen.fill((150, 100, 50))# 150, 100, 50
 
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_ESCAPE]: running = False
             player.update(keys, obstacles, weapons, monsters)
             if player.health <= 0:
                 game_running = False
                 game_over = True
+                game_over_sound.play()
 
         if game_running:
             weapons.update()
@@ -76,6 +93,7 @@ def main():
             game_running = False
             game_over = True
             won = True
+            win_sound.play()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -95,6 +113,9 @@ def main():
                 game_running = True
                 won = False
                 player, weapons, obstacles, monsters, bullets = init()
+            
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]: running = False
 
         pygame.display.flip()
         clock.tick(100)

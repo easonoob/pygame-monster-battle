@@ -3,6 +3,8 @@ import os
 import random
 import math
 
+pygame.mixer.init()
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, screen, start_x, start_y, target_x, target_y, map_width, map_height):
         super().__init__()
@@ -54,6 +56,7 @@ class Weapon(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.shooting = False
         self.last_shot_time = 0
+        self.sound = pygame.mixer.Sound(os.path.join('assets', 'gunshot.mp3'))
 
     def update(self, player_pos, mouse_pos):
         # x_diff = mouse_pos[0] - player_pos[0]
@@ -74,6 +77,7 @@ class Weapon(pygame.sprite.Sprite):
         now = pygame.time.get_ticks()
         if now - self.last_shot_time > 200:  # 500 ms between shots
             self.last_shot_time = now
+            self.sound.play()
             return Bullet(self.screen, player.rect.centerx, player.rect.centery, mouse_pos[0] - offset_x, mouse_pos[1] - offset_y, map_width, map_height)
 
 class WeaponGroup:

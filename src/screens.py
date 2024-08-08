@@ -1,4 +1,6 @@
 import pygame
+import os
+pygame.mixer.init()
 
 class StartScreen:
     def __init__(self, screen):

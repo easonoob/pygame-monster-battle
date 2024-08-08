@@ -47,8 +47,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.base_image
         self.original_image = self.image
         self.rect = self.image.get_rect(center=(x, y))
-        self.mask = pygame.mask.from_surface(self.image)  # Create a mask for the player
-        self.alive = True
+        self.mask = pygame.mask.from_surface(self.image)
         self.weapon = None
         self.center_offset = 20
 
@@ -63,7 +62,7 @@ class Player(pygame.sprite.Sprite):
             self.health -= 0.1 * len(collided)
             self.health_bar.set_health(self.health)
 
-        original_rect = self.rect.copy()  # Store the original position
+        original_rect = self.rect.copy()
         speed = 5
         if keys[pygame.K_w]:
             self.rect.y -= speed

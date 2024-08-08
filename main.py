@@ -14,9 +14,9 @@ pygame.display.set_caption("Monster Battle")
 
 def init():
     player = Player(screen, 150, 150, 'player_fists1.png')
-    weapons = WeaponGroup(screen, map_width, map_height)
     obstacles = ObstacleGroup(screen, 'obstacles.png')
-    monsters = MonsterGroup(screen, map_width, map_height, 100, obstacles)
+    weapons = WeaponGroup(screen, map_width, map_height, 5, obstacles)
+    monsters = MonsterGroup(screen, map_width, map_height, 25, obstacles)
     bullets = pygame.sprite.Group()
     return player, weapons, obstacles, monsters, bullets
 
@@ -47,11 +47,9 @@ def main():
             weapons.update()
             obstacles.update()
 
-            # Calculate the offset to keep the player in the center of the screen
             offset_x = screen_width // 2 - player.rect.centerx
             offset_y = screen_height // 2 - player.rect.centery
 
-            # Draw everything relative to the offset
             obstacles.draw(offset_x, offset_y)
             weapons.draw(offset_x, offset_y)
             player.update_direction(obstacles, offset_x, offset_y)
@@ -60,7 +58,7 @@ def main():
             monsters.update(bullets, player.rect, obstacles, offset_x, offset_y)
             monsters.draw(offset_x, offset_y)
             
-            bullets.update(obstacles)
+            bullets.update(obstacles, monsters)
             for bullet in bullets:
                 bullet.draw(offset_x, offset_y)
         

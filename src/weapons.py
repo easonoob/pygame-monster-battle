@@ -23,21 +23,27 @@ class Bullet(pygame.sprite.Sprite):
 
         self.map_width = map_width
         self.map_height = map_height
+        self.health = 10
 
-    def update(self, obstacles):
+    def update(self, obstacles, monsters):
         # Move bullet
         self.rect.x += self.dx
         self.rect.y += self.dy
 
         # Remove bullet if it goes off screen
-        if (self.rect.x < 0 or self.rect.x > self.map_width or
-                self.rect.y < 0 or self.rect.y > self.map_height):
-            self.kill()
-            # self.alive = False
+        # if (self.rect.x < 0 or self.rect.x > self.map_width or
+        #         self.rect.y < 0 or self.rect.y > self.map_height):
+        #     self.kill()
         
         if pygame.sprite.collide_mask(self, obstacles.obstacle_map):
             self.kill()
-            # self.alive = False
+        
+        collided = pygame.sprite.spritecollide(self, monsters.monsters, False)
+        if collided:
+            self.health -= len(collided)
+        
+        if self.health <= 0:
+            self.kill()
 
     def draw(self, offset_x, offset_y):
         self.screen.blit(self.image, (self.rect.x + offset_x, self.rect.y + offset_y))
@@ -73,16 +79,24 @@ class Weapon(pygame.sprite.Sprite):
         now = pygame.time.get_ticks()
         if now - self.last_shot_time > 200:  # 500 ms between shots
             self.last_shot_time = now
-            # Create a bullet heading towards the mouse position
             return Bullet(self.screen, player.rect.centerx, player.rect.centery, mouse_pos[0] - offset_x, mouse_pos[1] - offset_y, map_width, map_height)
 
 class WeaponGroup:
-    def __init__(self, screen, map_width, map_height, num_weapons=5):
+    def __init__(self, screen, map_width, map_height, num_weapons=5, obstacles=None):
         self.weapons = pygame.sprite.Group()
+        self.screen = screen
         for _ in range(num_weapons):
-            x = random.randint(0, map_width//2)
-            y = random.randint(0, map_height//2)
-            self.weapons.add(Weapon(screen, x, y))
+            weapon = self.create(map_width, map_height)
+            weapon.mask = pygame.mask.from_surface(weapon.image)
+            while pygame.sprite.collide_mask(weapon, obstacles.obstacle_map):
+                weapon = self.create(map_width, map_height)
+                weapon.mask = pygame.mask.from_surface(weapon.image)
+            self.weapons.add(weapon)
+
+    def create(self, map_width, map_height):
+        x = random.randint(0, map_width//3)
+        y = random.randint(0, map_height//3)
+        return Weapon(self.screen, x, y)
 
     def update(self):
         pass

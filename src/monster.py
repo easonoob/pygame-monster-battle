@@ -15,7 +15,7 @@ class Monster(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)  # Create a mask for the player
         self.health = 100
         self.max_health = 100
-        self.speed = 1
+        self.speed = 2 #1
 
         self.health_bar_width = 60
         self.health_bar_height = 10
@@ -38,9 +38,9 @@ class Monster(pygame.sprite.Sprite):
 
         original_rect = self.rect.copy()
 
-        self.rect.x += dx + random.randint(-2, 2)
+        self.rect.x += dx + (random.randint(-2, 2) if abs(dx) > 1 else random.randint(-5, 5))
         original_rect = self.check_collision(obstacles, original_rect)
-        self.rect.y += dy + random.randint(-2, 2)
+        self.rect.y += dy + (random.randint(-2, 2) if abs(dy) > 1 else random.randint(-5, 5))
         original_rect = self.check_collision(obstacles, original_rect)
 
         dx = player_rect.centerx - self.rect.centerx

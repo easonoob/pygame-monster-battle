@@ -4,7 +4,7 @@ import math
 import random
 
 class Monster(pygame.sprite.Sprite):
-    def __init__(self, screen, x, y, image_file):
+    def __init__(self, screen, x, y, speed, image_file):
         super().__init__()
         self.screen = screen
         self.base_image = pygame.image.load(os.path.join('assets', image_file)).convert_alpha()
@@ -15,7 +15,7 @@ class Monster(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.health = 100
         self.max_health = 100
-        self.speed = 2 #1
+        self.speed = speed#2 #1
 
         self.health_bar_width = 60
         self.health_bar_height = 10
@@ -76,9 +76,10 @@ class Monster(pygame.sprite.Sprite):
         pygame.draw.rect(self.screen, self.health_bar_color, health_fill_rect)
 
 class MonsterGroup:
-    def __init__(self, screen, map_width, map_height, num_monsters=50, obstacles=None):
+    def __init__(self, screen, map_width, map_height, num_monsters=50, obstacles=None, speed=2):
         self.monsters = pygame.sprite.Group()
         self.screen = screen
+        self.speed = speed
         for _ in range(num_monsters):
             monster = self.create(map_width, map_height)
             monster.mask = pygame.mask.from_surface(monster.image)
@@ -90,7 +91,7 @@ class MonsterGroup:
     def create(self, map_width, map_height):
         x = random.randint(int(map_width//1.5), map_width)
         y = random.randint(int(map_height//1.5), map_height)
-        return Monster(self.screen, x, y, 'monster.png')
+        return Monster(self.screen, x, y, self.speed, 'monster.png')
 
     def update(self, *args):
         self.monsters.update(*args)

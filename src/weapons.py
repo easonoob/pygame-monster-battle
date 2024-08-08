@@ -6,7 +6,7 @@ import math
 pygame.mixer.init()
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, screen, start_x, start_y, target_x, target_y, map_width, map_height):
+    def __init__(self, screen, start_x, start_y, target_x, target_y, map_width, map_height, bullet_health):
         super().__init__()
         self.screen = screen
         self.image = pygame.Surface((10, 10))
@@ -24,7 +24,7 @@ class Bullet(pygame.sprite.Sprite):
 
         self.map_width = map_width
         self.map_height = map_height
-        self.health = 10
+        self.health = bullet_health
 
     def update(self, obstacles, monsters):
         self.rect.x += self.dx
@@ -48,9 +48,10 @@ class Bullet(pygame.sprite.Sprite):
         self.screen.blit(self.image, (self.rect.x + offset_x, self.rect.y + offset_y))
 
 class Weapon(pygame.sprite.Sprite):
-    def __init__(self, screen, x, y):
+    def __init__(self, screen, x, y, bullet_health):
         super().__init__()
         self.screen = screen
+        self.bullet_health = bullet_health
         self.image = pygame.image.load(os.path.join('assets', 'weapon.png')).convert_alpha()
         self.image = pygame.transform.scale(self.image, (70, 50))
         self.rect = self.image.get_rect(center=(x, y))
@@ -78,12 +79,13 @@ class Weapon(pygame.sprite.Sprite):
         if now - self.last_shot_time > 200:  # 500 ms between shots
             self.last_shot_time = now
             self.sound.play()
-            return Bullet(self.screen, player.rect.centerx, player.rect.centery, mouse_pos[0] - offset_x, mouse_pos[1] - offset_y, map_width, map_height)
+            return Bullet(self.screen, player.rect.centerx, player.rect.centery, mouse_pos[0] - offset_x, mouse_pos[1] - offset_y, map_width, map_height, self.bullet_health)
 
 class WeaponGroup:
-    def __init__(self, screen, map_width, map_height, num_weapons=5, obstacles=None):
+    def __init__(self, screen, map_width, map_height, num_weapons=5, obstacles=None, bullet_health=5):
         self.weapons = pygame.sprite.Group()
         self.screen = screen
+        self.bullet_health = bullet_health
         for _ in range(num_weapons):
             weapon = self.create(map_width, map_height)
             weapon.mask = pygame.mask.from_surface(weapon.image)
@@ -95,7 +97,7 @@ class WeaponGroup:
     def create(self, map_width, map_height):
         x = random.randint(0, map_width//3)
         y = random.randint(0, map_height//3)
-        return Weapon(self.screen, x, y)
+        return Weapon(self.screen, x, y, self.bullet_health)
 
     def update(self):
         pass

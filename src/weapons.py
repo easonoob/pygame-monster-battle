@@ -4,7 +4,7 @@ import random
 import math
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, screen, start_x, start_y, target_x, target_y):
+    def __init__(self, screen, start_x, start_y, target_x, target_y, map_width, map_height):
         super().__init__()
         self.screen = screen
         self.image = pygame.Surface((10, 10))  # Small bullet
@@ -21,7 +21,8 @@ class Bullet(pygame.sprite.Sprite):
         self.dx = self.speed * x_diff / (distance + 5)
         self.dy = self.speed * y_diff / (distance + 5)
 
-        self.alive = True
+        self.map_width = map_width
+        self.map_height = map_height
 
     def update(self, obstacles):
         # Move bullet
@@ -29,8 +30,8 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y += self.dy
 
         # Remove bullet if it goes off screen
-        if (self.rect.x < 0 or self.rect.x > self.screen.get_width() or
-                self.rect.y < 0 or self.rect.y > self.screen.get_height()):
+        if (self.rect.x < 0 or self.rect.x > self.map_width or
+                self.rect.y < 0 or self.rect.y > self.map_height):
             self.kill()
             # self.alive = False
         
@@ -68,19 +69,19 @@ class Weapon(pygame.sprite.Sprite):
     def draw(self, offset_x, offset_y):
         self.screen.blit(self.image, (self.rect.x + offset_x, self.rect.y + offset_y))
 
-    def shoot(self, player, mouse_pos, offset_x, offset_y):
+    def shoot(self, player, mouse_pos, offset_x, offset_y, map_width, map_height):
         now = pygame.time.get_ticks()
         if now - self.last_shot_time > 200:  # 500 ms between shots
             self.last_shot_time = now
             # Create a bullet heading towards the mouse position
-            return Bullet(self.screen, player.rect.centerx, player.rect.centery, mouse_pos[0] - offset_x, mouse_pos[1] - offset_y)
+            return Bullet(self.screen, player.rect.centerx, player.rect.centery, mouse_pos[0] - offset_x, mouse_pos[1] - offset_y, map_width, map_height)
 
 class WeaponGroup:
     def __init__(self, screen, map_width, map_height, num_weapons=5):
         self.weapons = pygame.sprite.Group()
         for _ in range(num_weapons):
-            x = random.randint(0, map_width)
-            y = random.randint(0, map_height)
+            x = random.randint(0, map_width//2)
+            y = random.randint(0, map_height//2)
             self.weapons.add(Weapon(screen, x, y))
 
     def update(self):

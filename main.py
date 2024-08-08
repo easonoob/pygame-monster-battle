@@ -3,55 +3,80 @@ from src.player import Player
 from src.weapons import WeaponGroup
 from src.obstacles import ObstacleGroup
 from src.monster import MonsterGroup
+from src.screens import StartScreen, GameOverScreen
 
 pygame.init()
 
 screen_width, screen_height = 1600, 1000
+map_width, map_height = 1921, 1021
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Battle Royale")
+pygame.display.set_caption("Monster Battle")
+
+def init():
+    player = Player(screen, 150, 150, 'player_fists1.png')
+    weapons = WeaponGroup(screen, map_width, map_height)
+    obstacles = ObstacleGroup(screen, 'obstacles.png')
+    monsters = MonsterGroup(screen, map_width, map_height, 100, obstacles)
+    bullets = pygame.sprite.Group()
+    return player, weapons, obstacles, monsters, bullets
 
 def main():
     running = True
     clock = pygame.time.Clock()
-    
-    # Initialize game components
-    player = Player(screen, 150, 150, 'player_fists1.png')
-    weapons = WeaponGroup(screen, 1921, 1021)
-    obstacles = ObstacleGroup(screen, 'obstacles.png')
-    monsters = MonsterGroup(screen, 1921, 1021, 5, obstacles)
 
-    bullets = pygame.sprite.Group()
+    player, weapons, obstacles, monsters, bullets = init()
+
+    start_screen = StartScreen(screen)
+    lost_screen = GameOverScreen(screen, True)
+    won_screen = GameOverScreen(screen, False)
+    game_running = False
+    game_over = False
+    won = False
 
     while running:
-        screen.fill((150, 100, 50))# 150, 100, 50
+        if game_running:
+            screen.fill((150, 100, 50))# 150, 100, 50
 
-        keys = pygame.key.get_pressed()
-        player.update(keys, obstacles, weapons)
+            keys = pygame.key.get_pressed()
+            player.update(keys, obstacles, weapons, monsters)
+            if player.health <= 0:
+                game_running = False
+                game_over = True
+
+        if game_running:
+            weapons.update()
+            obstacles.update()
+
+            # Calculate the offset to keep the player in the center of the screen
+            offset_x = screen_width // 2 - player.rect.centerx
+            offset_y = screen_height // 2 - player.rect.centery
+
+            # Draw everything relative to the offset
+            obstacles.draw(offset_x, offset_y)
+            weapons.draw(offset_x, offset_y)
+            player.update_direction(obstacles, offset_x, offset_y)
+            player.draw(offset_x, offset_y)
+
+            monsters.update(bullets, player.rect, obstacles, offset_x, offset_y)
+            monsters.draw(offset_x, offset_y)
+            
+            bullets.update(obstacles)
+            for bullet in bullets:
+                bullet.draw(offset_x, offset_y)
         
-        weapons.update()
-        obstacles.update()
-
-        # Calculate the offset to keep the player in the center of the screen
-        offset_x = screen_width // 2 - player.rect.centerx
-        offset_y = screen_height // 2 - player.rect.centery
-
-        monsters.update(bullets, player.rect, obstacles, offset_x, offset_y)
-
-        # Draw everything relative to the offset
-        obstacles.draw(offset_x, offset_y)
-        weapons.draw(offset_x, offset_y)
-        player.update_direction(obstacles, offset_x, offset_y)
-        player.draw(offset_x, offset_y)
-        monsters.draw(offset_x, offset_y)
+        else:
+            if game_over:
+                if won:
+                    won_screen.draw()
+                else:
+                    lost_screen.draw()
+            else:
+                start_screen.draw()
         
-        bullets.update(obstacles)
-        for bullet in bullets:
-            # if not bullet.alive:
-            #     bullet.kill()
-            #     bullets.remove(bullet)
-            #     del bullet
-            # else:
-            bullet.draw(offset_x, offset_y)
+        if len(monsters.monsters) == 0:
+            game_running = False
+            game_over = True
+            won = True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -59,9 +84,18 @@ def main():
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if player.weapon:
-                    bullet = player.weapon.shoot(player, pygame.mouse.get_pos(), offset_x, offset_y)
+                    bullet = player.weapon.shoot(player, pygame.mouse.get_pos(), offset_x, offset_y, map_width, map_height)
                     if bullet is not None: bullets.add(bullet)
                     # print(bullets)
+            
+            if not game_running and start_screen.handle_event(event):
+                game_running = True
+
+            if game_over and (lost_screen.handle_event(event) or won_screen.handle_event(event)):
+                game_over = False
+                game_running = True
+                won = False
+                player, weapons, obstacles, monsters, bullets = init()
 
         pygame.display.flip()
         clock.tick(100)

@@ -2,6 +2,40 @@ import pygame
 import os
 import math
 
+class HealthBar:
+    def __init__(self, screen, x, y, width, height, color, background_color, font_size=36, font_color=(0, 0, 0)):
+        self.screen = screen
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.color = color
+        self.background_color = background_color
+        self.current_health = 100
+        self.max_health = 100
+        self.font_size = font_size
+        self.font_color = font_color
+        
+        # Initialize font
+        self.font = pygame.font.Font(None, self.font_size)
+
+    def set_health(self, health):
+        self.current_health = max(0, min(health, self.max_health))  # Clamp health between 0 and max_health
+
+    def draw(self):
+        # Draw the background of the health bar
+        pygame.draw.rect(self.screen, self.background_color, (self.x, self.y, self.width, self.height))
+        
+        # Draw the filled portion of the health bar
+        fill_width = self.width * (self.current_health / self.max_health)
+        pygame.draw.rect(self.screen, self.color, (self.x, self.y, fill_width, self.height))
+
+        # Render the health number
+        health_text = f"{round(self.current_health, 1)}"
+        text_surface = self.font.render(health_text, True, self.font_color)
+        text_rect = text_surface.get_rect(center=(self.x + self.width / 2, self.y + self.height / 2))
+        self.screen.blit(text_surface, text_rect)
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, screen, x, y, image_file):
         super().__init__()
@@ -18,7 +52,17 @@ class Player(pygame.sprite.Sprite):
         self.weapon = None
         self.center_offset = 20
 
-    def update(self, keys, obstacles, weapons):
+        self.health = 100
+        w, h = pygame.display.get_surface().get_size()
+        self.health_bar = HealthBar(screen, 100, h-100, 500, 50, (0, 255, 0), (255, 0, 0))
+
+    def update(self, keys, obstacles, weapons, monsters):
+
+        collided = pygame.sprite.spritecollide(self, monsters.monsters, False)
+        if collided:
+            self.health -= 0.1 * len(collided)
+            self.health_bar.set_health(self.health)
+
         original_rect = self.rect.copy()  # Store the original position
         speed = 5
         if keys[pygame.K_w]:
@@ -70,3 +114,4 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self, offset_x, offset_y):
         self.screen.blit(self.image, (self.rect.x + offset_x, self.rect.y + offset_y))
+        self.health_bar.draw()

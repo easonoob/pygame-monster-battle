@@ -2,11 +2,10 @@ import pygame
 from src.player import Player
 from src.weapons import WeaponGroup
 from src.obstacles import ObstacleGroup
+from src.monster import MonsterGroup
 
-# Initialize the game
 pygame.init()
 
-# Screen dimensions
 screen_width, screen_height = 1600, 1000
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Battle Royale")
@@ -17,14 +16,14 @@ def main():
     
     # Initialize game components
     player = Player(screen, 150, 150, 'player_fists1.png')
-    weapons = WeaponGroup(screen, screen_width*1.5, screen_height*1.5)
+    weapons = WeaponGroup(screen, 1921, 1021)
     obstacles = ObstacleGroup(screen, 'obstacles.png')
+    monsters = MonsterGroup(screen, 1921, 1021, 5, obstacles)
 
     bullets = pygame.sprite.Group()
 
-    # Game loop
     while running:
-        screen.fill((150, 100, 50))  # Fill the screen with black
+        screen.fill((150, 100, 50))# 150, 100, 50
 
         keys = pygame.key.get_pressed()
         player.update(keys, obstacles, weapons)
@@ -36,11 +35,14 @@ def main():
         offset_x = screen_width // 2 - player.rect.centerx
         offset_y = screen_height // 2 - player.rect.centery
 
+        monsters.update(bullets, player.rect, obstacles, offset_x, offset_y)
+
         # Draw everything relative to the offset
         obstacles.draw(offset_x, offset_y)
         weapons.draw(offset_x, offset_y)
         player.update_direction(obstacles, offset_x, offset_y)
         player.draw(offset_x, offset_y)
+        monsters.draw(offset_x, offset_y)
         
         bullets.update(obstacles)
         for bullet in bullets:

@@ -18,8 +18,8 @@ class Bullet(pygame.sprite.Sprite):
         x_diff = target_x - start_x
         y_diff = target_y - start_y
         distance = math.hypot(x_diff, y_diff)
-        self.dx = self.speed * x_diff / distance
-        self.dy = self.speed * y_diff / distance
+        self.dx = self.speed * x_diff / (distance + 5)
+        self.dy = self.speed * y_diff / (distance + 5)
 
         self.alive = True
 

@@ -38,6 +38,7 @@ def main():
             screen.fill((150, 100, 50))# 150, 100, 50
 
             keys = pygame.key.get_pressed()
+            if keys[pygame.K_ESCAPE]: running = False
             player.update(keys, obstacles, weapons, monsters)
             if player.health <= 0:
                 game_running = False

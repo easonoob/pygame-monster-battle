@@ -16,8 +16,8 @@ def main():
     clock = pygame.time.Clock()
     
     # Initialize game components
-    player = Player(screen, 50, 50, 'player.png')
-    weapons = WeaponGroup(screen)
+    player = Player(screen, 150, 150, 'player_fists1.png')
+    weapons = WeaponGroup(screen, screen_width*2, screen_height*2)
     obstacles = ObstacleGroup(screen, 'obstacles.png')
 
     # Game loop
@@ -27,8 +27,9 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        # Update game components
-        player.update(pygame.key.get_pressed(), obstacles)
+        keys = pygame.key.get_pressed()
+        player.update(keys, obstacles, weapons)
+        
         weapons.update()
         obstacles.update()
 
@@ -38,8 +39,9 @@ def main():
 
         # Draw everything relative to the offset
         obstacles.draw(offset_x, offset_y)
-        player.draw(offset_x, offset_y)
         weapons.draw(offset_x, offset_y)
+        player.update_direction(obstacles, offset_x, offset_y)
+        player.draw(offset_x, offset_y)
 
         pygame.display.flip()
         clock.tick(100)

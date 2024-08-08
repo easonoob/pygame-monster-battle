@@ -53,11 +53,12 @@ class Player(pygame.sprite.Sprite):
         dx = mouse_x - self.rect.centerx - offset_x
         dy = mouse_y - self.rect.centery - offset_y
         angle = math.degrees(math.atan2(-dy, dx)) - 90  # atan2 returns angle in radians
-        print(dx, dy, angle)
+
         # Rotate the image
         self.image = pygame.transform.rotate(self.original_image, angle)
         self.rect = self.image.get_rect(center=self.rect.center)
         original_rect = self.check_collision(obstacles, original_rect)
+        self.mask = pygame.mask.from_surface(self.image)
         
         # Adjust the center downwards
         # self.rect.centery += self.center_offset if self.weapon is not None else 0

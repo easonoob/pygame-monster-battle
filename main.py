@@ -17,15 +17,14 @@ def main():
     
     # Initialize game components
     player = Player(screen, 150, 150, 'player_fists1.png')
-    weapons = WeaponGroup(screen, screen_width*2, screen_height*2)
+    weapons = WeaponGroup(screen, screen_width*1.5, screen_height*1.5)
     obstacles = ObstacleGroup(screen, 'obstacles.png')
+
+    bullets = pygame.sprite.Group()
 
     # Game loop
     while running:
         screen.fill((150, 100, 50))  # Fill the screen with black
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
 
         keys = pygame.key.get_pressed()
         player.update(keys, obstacles, weapons)
@@ -42,6 +41,25 @@ def main():
         weapons.draw(offset_x, offset_y)
         player.update_direction(obstacles, offset_x, offset_y)
         player.draw(offset_x, offset_y)
+        
+        bullets.update(obstacles)
+        for bullet in bullets:
+            # if not bullet.alive:
+            #     bullet.kill()
+            #     bullets.remove(bullet)
+            #     del bullet
+            # else:
+            bullet.draw(offset_x, offset_y)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if player.weapon:
+                    bullet = player.weapon.shoot(player, pygame.mouse.get_pos(), offset_x, offset_y)
+                    if bullet is not None: bullets.add(bullet)
+                    # print(bullets)
 
         pygame.display.flip()
         clock.tick(100)
